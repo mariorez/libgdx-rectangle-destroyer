@@ -9,8 +9,8 @@ the bottom of the screen and uses it to bounce a ball toward the rectangular bri
 
 - **Java** 8
 - **Gradle** Wrapper 6.7.1
-- **LigGDX** 1.9.12: https://libgdx.badlogicgames.com
-- Setup tool: https://github.com/tommyettinger/gdx-liftoff
+- **LigGDX** 1.9.13: https://github.com/libgdx/libgdx
+- **GDX Liftoff** 1.9.13: https://github.com/tommyettinger/gdx-liftoff
 
 ## Disclaimer
 
