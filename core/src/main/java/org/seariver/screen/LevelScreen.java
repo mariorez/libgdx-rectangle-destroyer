@@ -1,8 +1,11 @@
 package org.seariver.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import org.seariver.BaseActor;
+import org.seariver.BaseGame;
 import org.seariver.BaseScreen;
 import org.seariver.actor.Ball;
 import org.seariver.actor.Brick;
@@ -13,6 +16,12 @@ public class LevelScreen extends BaseScreen {
 
     Paddle paddle;
     Ball ball;
+
+    int score;
+    int balls;
+    Label scoreLabel;
+    Label ballsLabel;
+    Label messageLabel;
 
     public void initialize() {
 
@@ -45,6 +54,20 @@ public class LevelScreen extends BaseScreen {
                 new Brick(x, y, mainStage);
             }
         }
+
+        score = 0;
+        balls = 3;
+        scoreLabel = new Label("Score: " + score, BaseGame.labelStyle);
+        ballsLabel = new Label("Balls: " + balls, BaseGame.labelStyle);
+        messageLabel = new Label("click to start", BaseGame.labelStyle);
+        messageLabel.setColor(Color.CYAN);
+
+        uiTable.pad(5);
+        uiTable.add(scoreLabel);
+        uiTable.add().expandX();
+        uiTable.add(ballsLabel);
+        uiTable.row();
+        uiTable.add(messageLabel).colspan(3).expandY();
     }
 
     public void update(float deltaTime) {
@@ -63,18 +86,44 @@ public class LevelScreen extends BaseScreen {
             }
         }
 
-        for (BaseActor brick : BaseActor.getList(mainStage, "org.seariver.actor.Brick")) {
-            if (ball.overlaps(brick)) {
-                ball.bounceOff(brick);
-                brick.remove();
-            }
-        }
-
         if (ball.overlaps(paddle)) {
             float ballCenterX = ball.getX() + ball.getWidth() / 2;
             float paddlePercentHit = (ballCenterX - paddle.getX()) / paddle.getWidth();
             float bounceAngle = MathUtils.lerp(150, 30, paddlePercentHit);
             ball.setMotionAngle(bounceAngle);
+        }
+
+        for (BaseActor brick : BaseActor.getList(mainStage, "org.seariver.actor.Brick")) {
+            if (ball.overlaps(brick)) {
+                ball.bounceOff(brick);
+                brick.remove();
+                score += 100;
+                scoreLabel.setText("Score: " + score);
+            }
+        }
+
+        if (BaseActor.count(mainStage, "org.seariver.actor.Brick") == 0) {
+            messageLabel.setText("You win!");
+            messageLabel.setColor(Color.LIME);
+            messageLabel.setVisible(true);
+        }
+
+        if (ball.getY() < -50 && BaseActor.count(mainStage, "org.seariver.actor.Brick") > 0) {
+
+            ball.remove();
+
+            if (balls > 0) {
+                balls -= 1;
+                ballsLabel.setText("Balls: " + balls);
+                ball = new Ball(0, 0, mainStage);
+                messageLabel.setText("Click to start");
+                messageLabel.setColor(Color.CYAN);
+            } else {
+                messageLabel.setText("Game Over");
+                messageLabel.setColor(Color.RED);
+            }
+
+            messageLabel.setVisible(true);
         }
     }
 
@@ -82,6 +131,7 @@ public class LevelScreen extends BaseScreen {
 
         if (ball.isPaused()) {
             ball.setPaused(false);
+            messageLabel.setVisible(false);
         }
 
         return false;
