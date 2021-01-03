@@ -1,6 +1,8 @@
 package org.seariver.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -19,6 +21,13 @@ public class LevelScreen extends BaseScreen {
     Label scoreLabel;
     Label ballsLabel;
     Label messageLabel;
+
+    Sound bounceSound;
+    Sound brickBumpSound;
+    Sound wallBumpSound;
+    Sound itemAppearSound;
+    Sound itemCollectSound;
+    Music backgroundMusic;
 
     public void initialize() {
 
@@ -65,6 +74,16 @@ public class LevelScreen extends BaseScreen {
         uiTable.add(ballsLabel);
         uiTable.row();
         uiTable.add(messageLabel).colspan(3).expandY();
+
+        bounceSound = Gdx.audio.newSound(Gdx.files.internal("boing.wav"));
+        brickBumpSound = Gdx.audio.newSound(Gdx.files.internal("bump.wav"));
+        wallBumpSound = Gdx.audio.newSound(Gdx.files.internal("bump-low.wav"));
+        itemAppearSound = Gdx.audio.newSound(Gdx.files.internal("swoosh.wav"));
+        itemCollectSound = Gdx.audio.newSound(Gdx.files.internal("pop.wav"));
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("Rollin-at-5.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.50f);
+        backgroundMusic.play();
     }
 
     public void update(float deltaTime) {
@@ -81,6 +100,7 @@ public class LevelScreen extends BaseScreen {
         for (BaseActor wall : BaseActor.getList(mainStage, "org.seariver.actor.Wall")) {
             if (ball.overlaps(wall)) {
                 ball.bounceOff(wall);
+                wallBumpSound.play();
             }
         }
 
@@ -89,12 +109,14 @@ public class LevelScreen extends BaseScreen {
             float paddlePercentHit = (ballCenterX - paddle.getX()) / paddle.getWidth();
             float bounceAngle = MathUtils.lerp(150, 30, paddlePercentHit);
             ball.setMotionAngle(bounceAngle);
+            bounceSound.play();
         }
 
         for (BaseActor brick : BaseActor.getList(mainStage, "org.seariver.actor.Brick")) {
             if (ball.overlaps(brick)) {
                 ball.bounceOff(brick);
                 brick.remove();
+                brickBumpSound.play();
 
                 score += 100;
                 scoreLabel.setText("Score: " + score);
@@ -109,6 +131,7 @@ public class LevelScreen extends BaseScreen {
 
         for (BaseActor item : BaseActor.getList(mainStage, "org.seariver.actor.Item")) {
             if (paddle.overlaps(item)) {
+                itemCollectSound.play();
                 Item realItem = (Item) item;
 
                 if (realItem.getType() == Item.Type.PADDLE_EXPAND)
@@ -141,6 +164,7 @@ public class LevelScreen extends BaseScreen {
                 ball = new Ball(0, 0, mainStage);
                 messageLabel.setText("Click to start");
                 messageLabel.setColor(Color.CYAN);
+                itemAppearSound.play();
             } else {
                 messageLabel.setText("Game Over");
                 messageLabel.setColor(Color.RED);
