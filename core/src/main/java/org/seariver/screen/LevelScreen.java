@@ -7,10 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import org.seariver.BaseActor;
 import org.seariver.BaseGame;
 import org.seariver.BaseScreen;
-import org.seariver.actor.Ball;
-import org.seariver.actor.Brick;
-import org.seariver.actor.Paddle;
-import org.seariver.actor.Wall;
+import org.seariver.actor.*;
 
 public class LevelScreen extends BaseScreen {
 
@@ -71,6 +68,7 @@ public class LevelScreen extends BaseScreen {
     }
 
     public void update(float deltaTime) {
+
         float mouseX = Gdx.input.getX();
         paddle.setX(mouseX - paddle.getWidth() / 2);
         paddle.boundToWorld();
@@ -97,8 +95,33 @@ public class LevelScreen extends BaseScreen {
             if (ball.overlaps(brick)) {
                 ball.bounceOff(brick);
                 brick.remove();
+
                 score += 100;
                 scoreLabel.setText("Score: " + score);
+
+                float spawnProbability = 20;
+                if (MathUtils.random(0, 100) < spawnProbability) {
+                    Item item = new Item(0, 0, mainStage);
+                    item.centerAtActor(brick);
+                }
+            }
+        }
+
+        for (BaseActor item : BaseActor.getList(mainStage, "org.seariver.actor.Item")) {
+            if (paddle.overlaps(item)) {
+                Item realItem = (Item) item;
+
+                if (realItem.getType() == Item.Type.PADDLE_EXPAND)
+                    paddle.setWidth(paddle.getWidth() * 1.25f);
+                else if (realItem.getType() == Item.Type.PADDLE_SHRINK)
+                    paddle.setWidth(paddle.getWidth() * 0.80f);
+                else if (realItem.getType() == Item.Type.BALL_SPEED_UP)
+                    ball.setSpeed(ball.getSpeed() * 1.50f);
+                else if (realItem.getType() == Item.Type.BALL_SPEED_DOWN)
+                    ball.setSpeed(ball.getSpeed() * 0.90f);
+
+                paddle.setBoundaryRectangle();
+                item.remove();
             }
         }
 
