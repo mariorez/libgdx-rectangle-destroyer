@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import org.seariver.BaseActor;
 import org.seariver.BaseScreen;
 import org.seariver.actor.Paddle;
+import org.seariver.actor.Wall;
 
 public class LevelScreen extends BaseScreen {
 
@@ -16,6 +17,10 @@ public class LevelScreen extends BaseScreen {
         BaseActor.setWorldBounds(background);
 
         paddle = new Paddle(320, 32, mainStage);
+
+        new Wall(0, 0, 20, 600, mainStage); // left wall
+        new Wall(780, 0, 20, 600, mainStage); // right wall
+        new Wall(0, 550, 800, 50, mainStage); // top wall
     }
 
     public void update(float deltaTime) {
